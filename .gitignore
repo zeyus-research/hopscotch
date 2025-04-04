@@ -11,3 +11,4 @@ data/
 .python-version
 uv.lock
 *.pdf
+*.mp4

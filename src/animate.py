@@ -67,7 +67,7 @@ def parse_args():
     parser.add_argument(
         "--trail-length", 
         type=int, 
-        default=20,
+        default=30,
         help="Length of trailing points to show"
     )
     parser.add_argument(

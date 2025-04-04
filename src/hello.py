@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse
 import logging
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Hello World")
     parser.add_argument(
@@ -11,6 +12,7 @@ def parse_args():
         help="Run the script in destructive mode.",
     )
     return parser.parse_args()
+
 
 
 def main(destructive: bool = False):

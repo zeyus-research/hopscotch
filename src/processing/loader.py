@@ -150,11 +150,11 @@ def load_mocap_data(path: Path) -> pd.DataFrame:
             dataset = df
         else:
             dataset = pd.concat([dataset, df], ignore_index=True)
-        # save the dataset to a file
-        dataset.to_feather("data/mocap_data.feather")
-        logging.info("Saved mocap data to data/mocap_data.feather.")
-        # save csv as well
-        dataset.to_csv("data/mocap_data.csv")
-        logging.info("Saved mocap data to data/mocap_data.csv.")
+    # save the dataset to a file
+    dataset.to_feather("data/mocap_data.feather")
+    logging.info("Saved mocap data to data/mocap_data.feather.")
+    # save csv as well
+    dataset.to_csv("data/mocap_data.csv")
+    logging.info("Saved mocap data to data/mocap_data.csv.")
         
     return dataset
