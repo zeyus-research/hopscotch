@@ -360,10 +360,10 @@ def animate_3d(coords_data, output=None, fps=30, trail_length=20, color_by="cond
     # ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12), 
     #           ncol=ncols, fontsize='small', frameon=True)
     
-    # Add labels
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
+    # Add labels with coordinate units
+    ax.set_xlabel('X (mm)')
+    ax.set_ylabel('Y (mm)')
+    ax.set_zlabel('Z (mm)')
     ax.set_title('Motion Capture Animation')
     
     # Determine number of frames from the first point

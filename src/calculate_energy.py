@@ -189,7 +189,7 @@ def calculate_motion_energy_velocity(marker_data, sampling_rate=300, mass=1.0):
     Calculate kinetic energy from marker position data based on velocity
     
     Parameters:
-    - marker_data: numpy array of shape [frames, 3] (x,y,z)
+    - marker_data: numpy array of shape [frames, 3] (x,y,z) - assumed in mm
     - sampling_rate: Hz (frames per second)
     - mass: arbitrary constant (can be set to 1.0 for relative comparisons)
     
@@ -201,13 +201,16 @@ def calculate_motion_energy_velocity(marker_data, sampling_rate=300, mass=1.0):
     if len(marker_data) < 2:
         return np.array([0]), 0
     
+    # Convert from mm to m (common mocap unit conversion)
+    marker_data_m = marker_data / 1000.0
+    
     # Calculate velocity (first derivative of position)
-    velocity = np.diff(marker_data, axis=0) * sampling_rate
+    velocity = np.diff(marker_data_m, axis=0) * sampling_rate
     
     # Calculate speed (magnitude of velocity vector)
     speed = np.linalg.norm(velocity, axis=1)
     
-    # Calculate kinetic energy (½mv²)
+    # Calculate kinetic energy (½mv²) - now in proper units (J)
     energy_per_frame = 0.5 * mass * speed**2
     
     # Total energy for the trial
@@ -278,7 +281,7 @@ def calculate_composite_energy(coords_data, point_keys, sampling_rate=300):
         'wrist': 0.05,
         'elbow': 0.05,
         'shoulder': 0.15,
-        'floor': 0.1,  # Less important for energy calculations
+        'floor': 0.000001,  # Less important for energy calculations
     }
     
     combined_energy = None
@@ -516,7 +519,7 @@ def create_total_energy_plot(results, output_dir, method):
     pivot_data.plot(kind='bar', ax=plt.gca())
     
     plt.title(f'Average Energy by Condition and Marker ({method.capitalize()} Method)')
-    plt.ylabel('Normalized Energy')
+    plt.ylabel('Normalized Energy (J/s)')
     plt.xlabel('Condition')
     plt.legend(title='Body Point')
     plt.tight_layout()
@@ -536,7 +539,7 @@ def create_total_energy_plot(results, output_dir, method):
     pivot_data.plot(kind='bar', ax=plt.gca())
     
     plt.title(f'Average Energy by Subject and Marker ({method.capitalize()} Method)')
-    plt.ylabel('Normalized Energy')
+    plt.ylabel('Normalized Energy (J/s)')
     plt.xlabel('Subject ID')
     plt.legend(title='Body Point')
     plt.tight_layout()
@@ -575,8 +578,8 @@ def create_energy_time_series_plot(results, output_dir, method):
             plt.plot(result['energy_profile'], label=label)
         
         plt.title(f'Energy Profile for Subject {subject} ({method.capitalize()} Method)')
-        plt.xlabel('Frame')
-        plt.ylabel('Energy')
+        plt.xlabel('Time (frame number)')
+        plt.ylabel('Energy (J)')
         plt.legend()
         plt.tight_layout()
         
@@ -614,8 +617,8 @@ def create_energy_per_second_plot(results, output_dir, method):
             plt.plot(result['energy_per_second'], marker='o', label=label)
         
         plt.title(f'Energy per Second for Subject {subject} ({method.capitalize()} Method)')
-        plt.xlabel('Second')
-        plt.ylabel('Energy')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Energy per Second (J/s)')
         plt.legend()
         plt.tight_layout()
         
