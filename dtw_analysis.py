@@ -9,9 +9,7 @@ import numpy as np
 from tqdm import tqdm
 from itertools import combinations
 import multiprocessing as mp
-from functools import partial
 import threading
-import os
 
 # Add src to path
 sys.path.append('src')

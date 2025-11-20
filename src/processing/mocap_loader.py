@@ -6,7 +6,7 @@ Handles subject/condition grouping and data preprocessing.
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from typing import Dict, List, Optional, Union, Tuple
+from typing import Dict, List, Optional, Tuple
 import c3d
 import logging
 from tqdm import tqdm
