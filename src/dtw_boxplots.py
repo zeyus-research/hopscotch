@@ -58,7 +58,7 @@ def load_dtw_data(filepath):
 
     return df
 
-def create_between_condition_boxplots(df, output_dir='hopscotch_results'):
+def create_between_condition_boxplots(df, output_dir='analysis'):
     """
     Create box plots for between-condition comparisons.
 
@@ -159,7 +159,7 @@ def create_between_condition_boxplots(df, output_dir='hopscotch_results'):
     print(f"Saved between-condition box plots to: {output_file}")
     plt.close()
 
-def create_between_participant_combined_boxplot(df, output_dir='hopscotch_results'):
+def create_between_participant_combined_boxplot(df, output_dir='analysis'):
     """
     Create a single box plot showing between-participant comparisons
     grouped by condition and obstacles (6 groups on x-axis).
@@ -293,7 +293,7 @@ def create_between_participant_combined_boxplot(df, output_dir='hopscotch_result
     print(f"Saved between-participant combined box plot to: {output_file}")
     plt.close()
 
-def create_within_participant_boxplots(df, output_dir='hopscotch_results'):
+def create_within_participant_boxplots(df, output_dir='analysis'):
     """
     Create box plots for within-participant comparisons.
 
@@ -396,7 +396,7 @@ def create_within_participant_boxplots(df, output_dir='hopscotch_results'):
     print(f"Saved within-participant box plots to: {output_file}")
     plt.close()
 
-def create_within_participant_combined_boxplot(df, output_dir='hopscotch_results'):
+def create_within_participant_combined_boxplot(df, output_dir='analysis'):
     """
     Create a single box plot showing within-participant comparisons
     grouped by condition combinations (9 groups on x-axis).
@@ -571,7 +571,7 @@ def create_within_participant_combined_boxplot(df, output_dir='hopscotch_results
 def main():
     """Main function to generate all plots."""
     # Load data
-    dtw_file = 'hopscotch_results/dtw_results_20250822_154121.tsv'
+    dtw_file = 'analysis/dtw_results_20250822_154121.tsv'
     print(f"Loading DTW data from: {dtw_file}")
     df = load_dtw_data(dtw_file)
     print(f"Loaded {len(df)} rows")

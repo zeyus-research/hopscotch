@@ -12,3 +12,6 @@ data/
 uv.lock
 *.pdf
 *.mp4
+old/
+analysis_results/
+analysis/

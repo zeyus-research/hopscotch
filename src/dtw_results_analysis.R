@@ -14,7 +14,7 @@ conflicts_prefer(lme4::lmer)
 conflicts_prefer(moments::skewness)
 
 # Load in the DTW results
-dtw_results <- read_tsv("hopscotch_results/dtw_results_20250822_154121.tsv")
+dtw_results <- read_tsv("analysis/dtw_results_20250822_154121.tsv")
 
 dtw_results <- dtw_results %>%
   mutate(
@@ -191,7 +191,6 @@ cat(sprintf("  Log model: %.2f\n", BIC(model_log)))
 
 
 # Clear argument for log transformation
-cat("\n✓ Log transformation selected for further analyses based on diagnostics.\n")
 
 
 # ============================================================================
@@ -199,13 +198,7 @@ cat("\n✓ Log transformation selected for further analyses based on diagnostics
 # ============================================================================
 
 
-
-# The rank deficiency occurs because condition_pair is nested within obstacles_match
-# When obstacles match: you get h-k, h-s, k-s (different conditions)
-# When obstacles don't match: you get h-h, k-k, s-s (same condition, different obstacles)
-# So we should analyze these separately or without interaction
-
-# Model 1a: Main effects only (avoids rank deficiency)
+# Model 1a: Main effects
 model_within_main <- lmer(
   log_dtw_distance ~ condition_pair + obstacles_match + (1 | subject_1),
   data = within_data,
@@ -217,7 +210,7 @@ print(report(model_within_main, estimator = "ML"))
 print(report_performance(model_within_main, estimator = "ML"))
 print(report_parameters(model_within_main, estimator = "ML"))
 
-# Model 1b: Focus on matched obstacles (your main question)
+# Model 1b: Focus on matched obstacles
 within_matched <- within_data %>%
   filter(obstacles_match == TRUE)
 

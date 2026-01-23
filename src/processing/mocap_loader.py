@@ -15,7 +15,7 @@ class MocapDataLoader:
     """
     Load and preprocess motion capture data from TSV or C3D files.
     """
-    
+
     def __init__(self, marker_labels_file: Optional[Path] = None):
         """
         Initialize the MocapDataLoader.
@@ -23,8 +23,9 @@ class MocapDataLoader:
         Args:
             marker_labels_file: Path to file containing marker labels
         """
-        self.marker_labels = self._load_marker_labels(marker_labels_file)
-        self.sampling_rate = None
+        self.marker_labels: List[str] = self._load_marker_labels(marker_labels_file)
+        self.sampling_rate: float = 300.0
+        self.total_removed_rows: int = 0
         
     def _load_marker_labels(self, labels_file: Optional[Path]) -> List[str]:
         """Load marker labels from file."""
@@ -129,6 +130,7 @@ class MocapDataLoader:
             
             removed_rows = len(df) - len(clean_df)
             if removed_rows > 0:
+                self.total_removed_rows += removed_rows
                 logging.info(f"Removed {removed_rows} rows with excessive missing data from {filename or 'data'}")
             
             # For remaining NaN values, use forward fill then backward fill
@@ -249,6 +251,14 @@ class MocapDataLoader:
             except Exception as e:
                 logging.warning(f"Could not save cache: {e}")
         
+        # Show total removed rows info
+        if self.total_removed_rows > 0:
+            logging.info(f"Total removed rows across dataset: {self.total_removed_rows}")
+            # Include a time based on sampling rate
+            if self.sampling_rate:
+                total_time_removed = self.total_removed_rows / self.sampling_rate
+                logging.info(f"Total time removed due to missing data: {total_time_removed:.2f} seconds")
+
         return dataset
     
     def get_marker_positions(self, df: pd.DataFrame, marker_name: str) -> np.ndarray:

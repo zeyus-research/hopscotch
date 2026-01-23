@@ -1,4 +1,4 @@
-from src.processing import mocap_loader
+from processing import mocap_loader
 import sys
 from pathlib import Path
 import pandas as pd
@@ -17,7 +17,7 @@ sys.path.append('src')
 
 def load_raw_data() -> pd.DataFrame:
     data_path = Path("data")
-    output_dir = Path("hopscotch_results")
+    output_dir = Path("analysis")
     output_dir.mkdir(exist_ok=True)
     
     # Create configuration
@@ -96,7 +96,7 @@ def append_result_to_tsv(result_row: dict, output_file: Path):
 def save_distance_matrix(distance_matrix: np.ndarray, unique_key: str, index: int) -> None:
     """Thread-safe save DTW distance matrix to a file"""
     with _file_lock:
-        output_dir = Path("hopscotch_results")
+        output_dir = Path("analysis")
         filename = output_dir / f'dtw_distance_matrix_{unique_key}_{index}.npy'
         
         # Ensure directory exists
@@ -158,7 +158,7 @@ def run_dtw_dataset_pairs(raw_data: pd.DataFrame, n_cores: int = None) -> None:
     marker_labels = marker_labels_file.read_text().splitlines()
     marker_labels = [label.strip() for label in marker_labels if label.strip()]
     
-    output_dir = Path("hopscotch_results")
+    output_dir = Path("analysis")
     date = pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')
     output_file = output_dir / f'dtw_results_{date}.tsv'
     
