@@ -200,6 +200,8 @@ class MocapDataLoader:
                     return dataset
                 except Exception as e:
                     logging.warning(f"Could not load cache: {e}")
+            else:
+                logging.warning(f"Cache file {cache_path} not found, loading from raw data.")
         
         # Load files
         files = list(data_path.glob(file_pattern))
@@ -207,7 +209,7 @@ class MocapDataLoader:
         
         dataset_frames = []
         
-        for file_path in tqdm(files, desc="Loading mocap files", unit="files"):
+        for file_path in tqdm(files, desc="Loading mocap files", unit=" files"):
             # Load file based on extension
             if file_path.suffix.lower() == '.c3d':
                 df = self.load_c3d_file(file_path)

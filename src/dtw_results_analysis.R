@@ -14,7 +14,8 @@ conflicts_prefer(lme4::lmer)
 conflicts_prefer(moments::skewness)
 
 # Load in the DTW results
-dtw_results <- read_tsv("analysis/dtw_results_20250822_154121.tsv")
+# dtw_results <- read_tsv("analysis/dtw_results_20250822_154121.tsv")
+dtw_results <- read_tsv("hopscotch_results/dtw_joint_angles_results_20260123_151036.tsv")
 
 dtw_results <- dtw_results %>%
   mutate(

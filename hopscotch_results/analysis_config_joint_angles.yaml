@@ -1,0 +1,5 @@
+cache_file: hopscotch_data_no_floor2.feather
+default_body_mass: 25.0
+log_level: INFO
+marker_labels_file: marker_labels_no_floor.txt
+sampling_rate: 300.0

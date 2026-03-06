@@ -571,7 +571,7 @@ def create_within_participant_combined_boxplot(df, output_dir='analysis'):
 def main():
     """Main function to generate all plots."""
     # Load data
-    dtw_file = 'analysis/dtw_results_20250822_154121.tsv'
+    dtw_file = 'hopscotch_results/dtw_joint_angles_results_20260123_151036.tsv'
     print(f"Loading DTW data from: {dtw_file}")
     df = load_dtw_data(dtw_file)
     print(f"Loaded {len(df)} rows")
