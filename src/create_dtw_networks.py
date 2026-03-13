@@ -176,15 +176,25 @@ plot_instance = Graph(
     seed=1
 )
 
-ax.set_title('Condition Network\n(Within-subject comparisons, averaged across all subjects)',
-             fontsize=14, fontweight='bold', pad=20)
+# ax.set_title('Nodes: Condition-Obstacle Pairs, Edges: Mean DTW Distance',
+#              fontsize=12, fontweight='bold', pad=0)
 
 ax.legend(handles=node_proxy_artists, loc='upper right', fontsize=10)
+plt.title('Within-Subject Condition Network', fontsize=14, fontweight='bold')
+# plt.suptitle('Within-Subject Condition Network', fontsize=14, fontweight='bold')
+# plt.title('Nodes: Condition-Obstacle Pairs, Edges: Mean DTW Distance',
+#              fontsize=12, fontweight='bold', pad=0, y=1.05)
 
-plt.tight_layout()
+plt.tight_layout(rect=[0, 0, 1, 1])
+
 plt.savefig(output_dir / 'condition_network.png', dpi=300, bbox_inches='tight')
 print(f"   Saved: {output_dir / 'condition_network.png'}")
 plt.close()
+
+# Print out means for each condition pair
+print("\nMean DTW Distances for Condition Pairs (Within-subject):")
+for _, row in edge_cond_summary.iterrows():
+    print(f"   {row['c1']} vs {row['c2']}: {row['distance']:.2f}")
 
 # ============================================================================
 # HIERARCHICAL CLUSTERING (All comparisons)

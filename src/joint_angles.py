@@ -204,15 +204,20 @@ def calculate_elbow_angle(df: pd.DataFrame, side: str = 'r') -> np.ndarray:
 def calculate_knee_angle(df: pd.DataFrame, side: str = 'r') -> np.ndarray:
     """
     Calculate knee flexion angle (intrinsic).
-    
-    Uses the midpoint of knee_over and knee_under as the knee joint center.
-    The angle is defined by hip → knee → ankle (foot midpoint).
+
+    knee_over is placed on the thigh (distal femur side) and knee_under on the
+    shank (proximal tibia side).  Using each marker as a reference point on its
+    own segment avoids inventing a shared joint centre, which would compress both
+    vectors and reduce angle sensitivity.
+
+    Thigh direction : knee_over → hip   (along femur)
+    Shank direction : knee_under → ankle (along tibia)
     0° = fully extended, increases with flexion.
-    
+
     Args:
         df: DataFrame with marker data
         side: 'r' for right, 'l' for left
-        
+
     Returns:
         Array of knee angles in radians, shape (n_frames,)
     """
@@ -220,24 +225,23 @@ def calculate_knee_angle(df: pd.DataFrame, side: str = 'r') -> np.ndarray:
     hip_front = get_marker_position(df, f'hip_front_{side}')
     hip_back = get_marker_position(df, f'hip_back_{side}')
     hip = (hip_front + hip_back) / 2
-    
-    # Knee center (midpoint of over and under markers)
-    knee_over = get_marker_position(df, f'knee_over_{side}')
+
+    # knee_over is on the thigh side; knee_under is on the shank side
+    knee_over  = get_marker_position(df, f'knee_over_{side}')
     knee_under = get_marker_position(df, f'knee_under_{side}')
-    knee = (knee_over + knee_under) / 2
-    
+
     # Ankle/foot center (midpoint of foot markers)
     foot_front = get_marker_position(df, f'foot_front_{side}')
-    foot_back = get_marker_position(df, f'foot_back_{side}')
+    foot_back  = get_marker_position(df, f'foot_back_{side}')
     ankle = (foot_front + foot_back) / 2
-    
-    # Vectors forming the angle
-    thigh = hip - knee    # knee → hip
-    shank = ankle - knee  # knee → ankle
-    
-    # Angle (π - this gives flexion angle)
+
+    # Each vector runs along its own segment, not from a shared pivot
+    thigh = hip   - knee_over   # knee_over  → hip   (femur direction)
+    shank = ankle - knee_under  # knee_under → ankle (tibia direction)
+
+    # Angle (π - this gives flexion angle: 0 = extended, π/2 = 90° bend)
     angle = np.pi - angle_between_vectors(thigh, shank)
-    
+
     return angle
 
 
