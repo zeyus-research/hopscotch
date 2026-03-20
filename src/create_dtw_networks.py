@@ -13,7 +13,7 @@ from netgraph import Graph
 
 # Load the data
 data_path = "analysis/dtw_results_20250822_154121.tsv"
-data_path = "hopscotch_results/dtw_joint_angles_results_20260123_151036.tsv"
+data_path = "hopscotch_results/dtw_joint_angles_results_20260313_135718.tsv"
 df = pd.read_csv(data_path, sep='\t')
 
 print(f"Total comparisons: {len(df)}")
@@ -96,7 +96,7 @@ weights_cond = [G_conditions[u][v]['weight'] for u, v in edges_cond]
 # Normalize weights for edge thickness (inverse: smaller distance = thicker edge)
 max_weight_cond = max(weights_cond)
 min_weight_cond = min(weights_cond)
-edge_widths_cond = {(u, v): 5 * (1 - (w - min_weight_cond) / (max_weight_cond - min_weight_cond)) + 1
+edge_widths_cond = {(u, v): 3 * (1 - (w - min_weight_cond) / (max_weight_cond - min_weight_cond)) + 2.5
                     for (u, v), w in zip(edges_cond, weights_cond)}
 
 # Edge colors based on distance - manually apply colormap
@@ -150,7 +150,7 @@ for node in G_conditions.nodes():
 # Scale edge weights to reasonable range for visualization (0.1 to 0.9)
 max_dist_cond = max(weights_cond)
 min_dist_cond = min(weights_cond)
-edge_layout_cond = {(u, v): 0.2 + 0.7 * (G_conditions[u][v]['weight'] - min_dist_cond) / (max_dist_cond - min_dist_cond)
+edge_layout_cond = {(u, v): 0.3 + 0.6 * (G_conditions[u][v]['weight'] - min_dist_cond) / (max_dist_cond - min_dist_cond)
                     for u, v in G_conditions.edges()}
 
 # Edge labels with distances
@@ -161,7 +161,7 @@ plot_instance = Graph(
     G_conditions,
     node_layout='geometric',
     node_layout_kwargs=dict(edge_length=edge_layout_cond, tol=1e-6),
-    scale=(4, 4),
+    scale=(2, 2),
     node_color=node_colors_cond,
     node_size=15,
     node_edge_width=0.5,
