@@ -58,6 +58,7 @@ ggplot(trial_times_by_subj_cond, aes(x = trial_time, fill = condition)) +
     theme(text = element_text(size = 14)) +
     theme(legend.title = element_blank())
 
+ggsave("analysis/trial_time_distribution.png", width = 8, height = 6, dpi = 300)
 
 trial_times_by_subj_cond %>% arrange(desc(trial_time))
 
@@ -88,3 +89,48 @@ qqline(residuals(model_log))
 check_model(model_log)
 
 # Transform results back to original scale for interpretation
+
+
+
+# Now create an accuracy model:
+accuracy_csv <- "data/Additional data incl. demographics and trial combinations final.csv"
+accuracy_data <- read_delim(accuracy_csv, delim = ";", locale = locale(decimal_mark = ","))
+
+# accuracy columns are: k0_acc;k1_acc;h0_acc;h1_acc;s0_acc;s1_acc;
+# participant id is in: participant_no
+accuracy_data <- accuracy_data %>%
+    select(participant_no, k0_acc, k1_acc, h0_acc, h1_acc, s0_acc, s1_acc) %>%
+    pivot_longer(cols = -participant_no, names_to = "condition_obstacles", values_to = "accuracy") %>%
+    separate(condition_obstacles, into = c("na", "condition", "obstacles"), sep = "", extra = "drop") %>%
+    select(-na) %>%
+    mutate(
+        condition = recode(condition, "h" = "extrinsic", "s" = "intrinsic", "k" = "control"),
+        obstacles = factor(obstacles),
+        participant_no = factor(participant_no)
+    )
+
+accuracy_data$log_accuracy <- log(accuracy_data$accuracy + 1e-5) # Add small constant to avoid log(0)
+accuracy_model <- lmer(log_accuracy ~ condition * obstacles + (1 | participant_no), data = accuracy_data)
+summary(accuracy_model)
+report(accuracy_model, estimator = "ML")
+
+accuracy_model_nolog <- lmer(accuracy ~ condition * obstacles + (1 | participant_no), data = accuracy_data)
+
+qqnorm(residuals(accuracy_model))
+qqline(residuals(accuracy_model))
+
+qqnorm(residuals(accuracy_model_nolog))
+qqline(residuals(accuracy_model_nolog))
+
+# plot distribution of accuracy
+ggplot(accuracy_data, aes(x = accuracy, fill = condition)) +
+    geom_density(alpha = 0.5) +
+    labs(title = "Distribution of Accuracy by Condition", x = "Accuracy", y = "Density") +
+    theme_minimal() +
+    scale_fill_manual(values = c(intrinsic="lightblue", extrinsic="salmon", control="lightgreen")) +
+    theme(text = element_text(size = 14)) +
+    theme(legend.title = element_blank())
+
+
+
+ggsave("analysis/accuracy_distribution.png", width = 8, height = 6, dpi = 300)

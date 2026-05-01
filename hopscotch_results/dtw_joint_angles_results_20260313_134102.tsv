@@ -1,0 +1,9 @@
+index	dtw_type	subject_1	subject_2	condition_1	condition_2	obstacles_1	obstacles_2	dtw_distance	distance_matrix_key
+0	within	33	33	h	k	0	0	105.33472440277988	s33-s33_ch-ck_o0-o0
+1	within	33	33	h	s	0	0	86.44492729892686	s33-s33_ch-cs_o0-o0
+2	within	33	33	k	s	0	0	88.13320166025271	s33-s33_ck-cs_o0-o0
+3	within	33	33	h	k	1	1	91.91604609420546	s33-s33_ch-ck_o1-o1
+4	within	33	33	h	s	1	1	113.10656661027978	s33-s33_ch-cs_o1-o1
+5	within	33	33	k	s	1	1	100.73436913952261	s33-s33_ck-cs_o1-o1
+6	within	33	33	h	h	0	1	92.8997767696717	s33-s33_ch-ch_o0-o1
+7	within	33	33	k	k	0	1	88.95220278105414	s33-s33_ck-ck_o0-o1

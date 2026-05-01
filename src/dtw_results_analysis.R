@@ -215,6 +215,16 @@ print(report_parameters(model_within_main, estimator = "ML"))
 within_matched <- within_data %>%
   filter(obstacles_match == TRUE)
 
+# relevel condition_pair to only include matched pairs
+# we only have 3 unique values now h-k, h-s, k-s (representing extrinsic vs control, extrinsic vs intrinsic, and control vs intrinsic)
+within_matched <- within_matched %>%
+  filter(condition_pair %in% c("h-k", "h-s", "k-s")) %>%
+  mutate(condition_pair = recode(condition_pair, "h-k" = "extrinsic-control", "h-s" = "extrinsic-intrinsic", "k-s" = "control-intrinsic"))
+
+# remove h-h, k-k, s-s levels
+within_matched$condition_pair <- droplevels(within_matched$condition_pair)
+
+
 model_within_matched <- lmer(
   log_dtw_distance ~ condition_pair + (1 | subject_1),
   data = within_matched,
