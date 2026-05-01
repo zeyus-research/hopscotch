@@ -84,12 +84,41 @@ class MocapDataLoader:
         """
         try:
             # Preprocess file header (similar to existing loader)
-            with open(file_path, "r+") as f:
-                lines = f.readlines()
-                f.seek(0)
-                f.writelines([
-                    lines[0].strip().replace(" ", ".") + "\n"
-                ] + lines[1:])
+            # with open(file_path, "r+") as f:
+            #     lines = f.readlines()
+                
+            #     lines[0].strip().replace(" ", ".") + "\n"
+                
+            #     # Now we need to carefully handle a cleanup issue
+            #     # in the TSV files, the frame number is sequential
+            #     # but most files have some trailing errors e.g.
+            #     # 1234
+            #     # 1235
+            #     # 1236
+            #     # \t0.3
+            #     # 1235
+            #     # 1236
+            #     # in the above case, the frame (empty)\t0.3 and all below should be removed
+            #     # these are repeat frames and an odd row without a frame number
+            #     last_frame_index = 0
+            #     end_row_index = 1
+            #     for i in range(1, len(lines)):
+            #         first_col = lines[i].split("\t")[0].strip()
+            #         if first_col.isdigit():
+            #             if int(first_col) > last_frame_index:
+            #                 last_frame_index = int(first_col)
+            #                 end_row_index = i + 1
+            #         else:
+            #             break
+            #     if end_row_index < len(lines):
+            #         logging.warning(f"Trimming {len(lines) - end_row_index} rows from {file_path} due to non-sequential frame numbers")
+            #     lines = lines[:end_row_index]
+            #     # go to start of file
+            #     f.seek(0)
+            #     # truncate file to remove old content
+            #     f.buffer.truncate(0)
+            #     # write cleaned lines back to file
+            #     f.writelines(lines)
             
             # Read the TSV file
             df = pd.read_csv(file_path, sep="\t", low_memory=False, skip_blank_lines=True)
@@ -98,6 +127,12 @@ class MocapDataLoader:
             if "X" in df.columns:
                 df.drop(columns=["X"], inplace=True)
             
+            # count total NaN values before cleaning
+            total_nans_before = df.isnull().sum().sum()
+            if total_nans_before > 10_000:
+                logging.warning(f"File {file_path} has {total_nans_before} NaN values - EXCLUDING")
+                return pd.DataFrame()
+
             # Clean data - remove rows where all coordinates are NaN
             df = self.clean_mocap_data(df, file_path.name)
             
@@ -122,21 +157,21 @@ class MocapDataLoader:
         
         if len(marker_cols) > 0:
             # Count NaN values per row for marker columns
-            nan_per_row = df[marker_cols].isnull().sum(axis=1)
+            # nan_per_row = df[marker_cols].isnull().sum(axis=1)
             
-            # Remove rows where more than 50% of marker data is missing
-            threshold = len(marker_cols) * 0.5
-            clean_df = df[nan_per_row <= threshold].copy()
+            # # Remove rows where more than 50% of marker data is missing
+            # threshold = len(marker_cols) * 0.5
+            # clean_df = df[nan_per_row <= threshold].copy()
             
-            removed_rows = len(df) - len(clean_df)
-            if removed_rows > 0:
-                self.total_removed_rows += removed_rows
-                logging.info(f"Removed {removed_rows} rows with excessive missing data from {filename or 'data'}")
+            # removed_rows = len(df) - len(clean_df)
+            # if removed_rows > 0:
+            #     self.total_removed_rows += removed_rows
+            #     logging.info(f"Removed {removed_rows} rows with excessive missing data from {filename or 'data'}")
             
             # For remaining NaN values, use forward fill then backward fill
-            clean_df[marker_cols] = clean_df[marker_cols].ffill().bfill()
+            df[marker_cols] = df[marker_cols].ffill().bfill()
             
-            return clean_df
+            return df
         
         return df
     
@@ -243,7 +278,13 @@ class MocapDataLoader:
         
         # Combine all data
         dataset = pd.concat(dataset_frames, ignore_index=True)
-        
+
+        # # report the number of NaN values per subject, trial, obstacles
+        # nan_report = dataset.groupby(['subject', 'condition', 'obstacles'])[[col for col in dataset.columns if any(coord in col for coord in ['.X', '.Y', '.Z'])]].apply(lambda x: x.isnull().sum().sum())
+        # # order by number of NaN values
+        # nan_report = nan_report.sort_values(ascending=False)
+        # logging.info("NaN values report (sorted by total NaNs):")
+        # logging.info(nan_report)
         # Save cache if requested
         if cache_file:
             cache_path = data_path / cache_file

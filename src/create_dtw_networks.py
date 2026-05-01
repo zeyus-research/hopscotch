@@ -13,7 +13,7 @@ from netgraph import Graph
 
 # Load the data
 data_path = "analysis/dtw_results_20250822_154121.tsv"
-data_path = "hopscotch_results/dtw_joint_angles_results_20260313_135718.tsv"
+data_path = "hopscotch_results/dtw_joint_angles_results_20260327_083352.tsv"
 df = pd.read_csv(data_path, sep='\t')
 
 print(f"Total comparisons: {len(df)}")

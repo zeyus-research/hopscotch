@@ -19,38 +19,6 @@ source_data <- "data/hopscotch_data_no_floor2.feather"
 
 all_trial_data <- read_feather(source_data)
 
-# first remove all trials after the first non-sequential frame number
-# there is a problem with some where some garbage data
-# (max ~10 rows) were appended
-all_trial_data_cropped <- all_trial_data %>%
-    group_by(subject, condition, obstacles) %>%
-    mutate(frame_diff = Frame - lag(Frame))
-
-# find the first non-sequential frame for each subject, condition, and obstacles group
-# the garbage frames are not unique in number and may
-# be a number that exists earlier in the data
-# but because the recorded data is sequential
-# the first "out of place" frame is where the garbage
-# starts
-# in this case non-sequential is = decreasing (some skipped positive changes are fine)
-first_non_sequential <- all_trial_data_cropped %>%
-    filter(frame_diff < 0 & !is.na(frame_diff)) %>%
-    group_by(subject, condition, obstacles) %>%
-    summarise(first_non_seq_frame = first(Frame)) %>%
-    ungroup()
-
-# now filter out all rows where the frame is greater than or equal to the first non-sequential frame
-all_trial_data_cropped <- all_trial_data_cropped %>%
-    left_join(first_non_sequential, by = c("subject", "condition", "obstacles")) %>%
-    filter(is.na(first_non_seq_frame) | Frame < first_non_seq_frame) %>%
-    select(-frame_diff, -first_non_seq_frame)
-
-
-# print subject condition obstacles for the rows with the least and most frames
-all_trial_data_cropped %>% group_by(subject, condition, obstacles) %>% summarise(first(subject), first(condition), first(obstacles), rowcounts=n()) %>% ungroup() %>% arrange(rowcounts) %>% slice(c(1, n()))
-
-
-
 # set factor levels for condition and obstacles and subject
 all_trial_data <- all_trial_data %>%
     mutate(
@@ -59,7 +27,11 @@ all_trial_data <- all_trial_data %>%
         subject = factor(subject)
     )
 
-all_trial_data <- all_trial_data %>% arrange(subject, condition, obstacles, trial, Time)
+all_trial_data <- all_trial_data %>% arrange(subject, condition, obstacles, Time)
+
+# see if there are any NaN / missing values
+missing_values <- all_trial_data %>%
+    summarise_all(~ sum(is.na(.)))
 
 trial_times_by_subj_cond <- all_trial_data %>%
     group_by(subject, condition, obstacles) %>%
@@ -70,14 +42,49 @@ trial_times_by_subj_cond <- all_trial_data %>%
         obstacles = first(obstacles)
     ) %>%
     ungroup()
+# rename conditions
+# h -> extrinsic
+# s -> intrinsic
+# k -> control
+trial_times_by_subj_cond <- trial_times_by_subj_cond %>%
+    mutate(condition = recode(condition, "h" = "extrinsic", "s" = "intrinsic", "k" = "control"))
 
 # plot distribution curve colored by condition
 ggplot(trial_times_by_subj_cond, aes(x = trial_time, fill = condition)) +
     geom_density(alpha = 0.5) +
-    labs(title = "Distribution of Trial Times by Condition", x = "Trial Time (seconds)", y = "Density") +
+    labs(title = "Distribution of Trial Durations by Condition", x = "Trial Duration (seconds)", y = "Density") +
     theme_minimal() +
-    scale_fill_manual(values = c("lightblue", "salmon", "lightgreen")) +
+    scale_fill_manual(values = c(intrinsic="lightblue", extrinsic="salmon", control="lightgreen")) +
+    theme(text = element_text(size = 14)) +
     theme(legend.title = element_blank())
 
 
 trial_times_by_subj_cond %>% arrange(desc(trial_time))
+
+
+# Fit linear mixed model with subject as random effect
+model <- lmer(trial_time ~ condition * obstacles + (1 | subject), data = trial_times_by_subj_cond)
+summary(model)
+report(model, estimator = "ML")
+
+# Q-Q plot for model residuals
+qqnorm(residuals(model))
+qqline(residuals(model))
+
+# Model diagnostics
+check_model(model)
+
+# Model log
+trial_times_by_subj_cond_log <- trial_times_by_subj_cond %>%
+    mutate(log_trial_time = log(trial_time))
+model_log <- lmer(log_trial_time ~ condition * obstacles + (1 | subject), data = trial_times_by_subj_cond_log)
+summary(model_log)
+report(model_log, estimator = "ML")
+
+# Q-Q plot for model residuals
+qqnorm(residuals(model_log))
+qqline(residuals(model_log))
+
+check_model(model_log)
+
+# Transform results back to original scale for interpretation

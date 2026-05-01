@@ -15,3 +15,4 @@ uv.lock
 old/
 analysis_results/
 analysis/
+*.bak
